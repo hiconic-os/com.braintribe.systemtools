@@ -73,6 +73,11 @@ public class SystemTools implements SysTools {
 		return -1;
 	}
 
+	/** @return true iff JVM is running in debug mode */
+	public static boolean isJvmDebugMode() {
+	    return java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString().contains("-agentlib:jdwp");
+	}
+
 	public static String getOperatingSystem() {
 		if (OS == null) {
 			if (OS_NAME == null) { 
