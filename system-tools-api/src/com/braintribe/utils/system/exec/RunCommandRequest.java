@@ -15,6 +15,7 @@
 // ============================================================================
 package com.braintribe.utils.system.exec;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class RunCommandRequest {
 	protected Map<String, String> environmentVariables = null;
 	protected boolean silent = false;
 	protected String input;
+	protected File workingDirectory;
 
 	public static RunCommandRequestBuilder builder() {
 		return new RunCommandRequestBuilder();
@@ -65,6 +67,10 @@ public class RunCommandRequest {
 		}
 		public RunCommandRequestBuilder silent(boolean silent) {
 			request.silent = silent;
+			return this;
+		}
+		public RunCommandRequestBuilder workingDirectory(File workingDirectory) {
+			request.workingDirectory = workingDirectory;
 			return this;
 		}
 		public RunCommandRequest build() {
@@ -185,6 +191,9 @@ public class RunCommandRequest {
 	}
 	public String getInput() {
 		return input;
+	}
+	public File getWorkingDirectory() {
+		return workingDirectory;
 	}
 
 	@Override

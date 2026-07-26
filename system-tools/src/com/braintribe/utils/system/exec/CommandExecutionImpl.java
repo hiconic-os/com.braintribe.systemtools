@@ -54,6 +54,7 @@ public class CommandExecutionImpl implements CommandExecution {
 		long retryDelay = request.getRetryDelay();
 		boolean silent = request.isSilent();
 		String input = request.getInput();
+		File workingDirectory = request.getWorkingDirectory();
 
 		String signature = String.format("runCommand(commands='%s', timeout=%d, retries=%d, retryDelay=%d, environmentVariables=%s)",
 				commandDescription, timeout, retries, retryDelay, environmentVariables);
@@ -66,14 +67,14 @@ public class CommandExecutionImpl implements CommandExecution {
 				logger.debug(String.format("%s: begin", signature));
 		}
 
-		RunCommandContext result = runCommand(commandParts, timeout, false, environmentVariables, input);
+		RunCommandContext result = runCommand(commandParts, timeout, false, environmentVariables, input, workingDirectory);
 		int count = 0;
 		while ((count < retries) && (result.getErrorCode() != 0)) {
 			count++;
 
 			trace(commandDescription, timeout, count, retries);
 
-			result = runCommand(commandParts, timeout, false, environmentVariables, input);
+			result = runCommand(commandParts, timeout, false, environmentVariables, input, workingDirectory);
 
 			if (result.getErrorCode() != 0) {
 				if ((retryDelay > 0) && (count < retries)) {
@@ -102,6 +103,11 @@ public class CommandExecutionImpl implements CommandExecution {
 
 	protected RunCommandContext runCommand(String[] command, long timeout, boolean silent, Map<String, String> environmentVariables, String input)
 			throws Exception {
+		return runCommand(command, timeout, silent, environmentVariables, input, null);
+	}
+
+	protected RunCommandContext runCommand(String[] command, long timeout, boolean silent, Map<String, String> environmentVariables, String input,
+			File workingDirectory) throws Exception {
 
 		long t1 = System.currentTimeMillis();
 
@@ -121,6 +127,8 @@ public class CommandExecutionImpl implements CommandExecution {
 
 		try {
 			ProcessBuilder processBuilder = new ProcessBuilder(command);
+			if (workingDirectory != null)
+				processBuilder.directory(workingDirectory);
 			processBuilder.redirectOutput(Redirect.to(stdoutFile));
 			processBuilder.redirectError(Redirect.to(stderrFile));
 
