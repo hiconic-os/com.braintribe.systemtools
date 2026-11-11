@@ -1,5 +1,6 @@
 package com.braintribe.utils.system.exec.tool;
 
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -11,5 +12,10 @@ import java.util.List;
 public interface ToolCommandLineBuilder {
 
 	List<String> build(ToolWorkspace workspace, List<String> arguments);
+
+	/** Host working directory for the command. Tool files still belong to the execution workspace. */
+	default Path workingDirectory(ToolWorkspace workspace) {
+		return workspace.root();
+	}
 
 }

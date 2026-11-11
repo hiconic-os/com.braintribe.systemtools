@@ -3,6 +3,7 @@ package com.braintribe.utils.system.exec.tool;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,6 +85,29 @@ public class StandardToolExecutionEnvironmentTest {
 			execution.execute(ToolExecutionRequest.builder().argument("input.pdf").build());
 			Assert.assertArrayEquals(
 					new String[] { "container", "--workdir", execution.workspace().root().toString(), "containerized", "input.pdf" },
+					commandExecution.lastRequest.getCommandParts());
+		}
+	}
+
+	@Test
+	public void commandLineBuilderCanRunFromApplicationDirectory() throws Exception {
+		Path applicationDirectory = Paths.get("application");
+		environment.register("containerized", () -> java.util.Collections.singletonList("containerized"), new ToolCommandLineBuilder() {
+			@Override
+			public List<String> build(ToolWorkspace workspace, List<String> arguments) {
+				return java.util.Arrays.asList("docker", "compose", "--file", "local/compose.yaml", "exec", "tools", "gs");
+			}
+
+			@Override
+			public Path workingDirectory(ToolWorkspace workspace) {
+				return applicationDirectory;
+			}
+		});
+
+		try (ToolExecution execution = environment.required("containerized").openExecution()) {
+			execution.execute(ToolExecutionRequest.builder().build());
+			Assert.assertEquals(applicationDirectory.toFile(), commandExecution.lastRequest.getWorkingDirectory());
+			Assert.assertArrayEquals(new String[] { "docker", "compose", "--file", "local/compose.yaml", "exec", "tools", "gs" },
 					commandExecution.lastRequest.getCommandParts());
 		}
 	}

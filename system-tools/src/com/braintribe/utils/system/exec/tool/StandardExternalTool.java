@@ -85,7 +85,7 @@ public class StandardExternalTool implements ExternalTool {
 				.env(request.getEnvironmentVariables()) //
 				.input(request.getInput()) //
 				.silent(request.isSilent()) //
-				.workingDirectory(scope.workspace().root().toFile()) //
+				.workingDirectory((commandLineBuilder == null ? scope.workspace().root() : commandLineBuilder.workingDirectory(scope.workspace())).toFile()) //
 				.build();
 
 		RunCommandContext result = environment.commandExecution().runCommand(lowLevelRequest);
